@@ -15,7 +15,7 @@ ifdef DEBUG
 endif
 
 all: $(NAME)
-	./$< infile "grep c" "wc -l" outfile
+	./$< infile "grep c" outfile
 	# ./$<
 
 _bin:

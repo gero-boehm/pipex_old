@@ -6,7 +6,7 @@
 /*   By: gbohm <gbohm@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/12 15:44:18 by gbohm             #+#    #+#             */
-/*   Updated: 2023/02/02 16:41:07 by gbohm            ###   ########.fr       */
+/*   Updated: 2023/02/02 19:08:31 by gbohm            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,8 @@ int	get_paths(char *const *envp, char ***paths)
 		if (ft_substr2(*envp, 5, ft_strlen(*envp) - 5, &str))
 			return (1);
 		if (ft_split2(str, ':', paths))
-			return (2);
+			return (free(str), 2);
+		free(str);
 		break ;
 	}
 	return (0);
@@ -138,6 +139,7 @@ int	join_path2(const char *a, const char *b, const char *c, char **path)
 	*path = ft_strjoin(tmp, c);
 	if (tmp == NULL)
 		return (free(tmp), 2);
+	free(tmp);
 	return (0);
 }
 
@@ -155,10 +157,14 @@ int	get_command_path(const char *cmd, char *const *envp, char **path)
 			return (free_arr((void **) paths), 1);
 		cursor++;
 		if (access(*path, F_OK))
+		{
+			free(*path);
 			continue ;
+		}
 		free_arr(paths);
 		return (0);
 	}
+	free_arr(paths);
 	free(*path);
 	return (1);
 }
@@ -175,8 +181,12 @@ int	main(int argc, const char **argv, char *const *envp)
 	(void) argc;
 	(void) argv;
 	// (void) envp;
+	if (access(argv[1], F_OK))
+		return (1);
+	if (access(argv[argc - 1], F_OK))
+		return (2);
 
-	int fd = open("./src/infile", O_RDONLY);
+	int fd = open(argv[1], O_RDONLY);
 
 	printf("open: %d\n", fd);
 
@@ -193,8 +203,6 @@ int	main(int argc, const char **argv, char *const *envp)
 	int i = 2;
 	while (i < argc - 1)
 	{
-		printf("%s\n", "test");
-		printf("%s\n", argv[i]);
 		if (ft_split2(argv[i], ' ', &params))
 			return (1);
 		if (get_command_path(params[0], envp, &path))
@@ -205,8 +213,6 @@ int	main(int argc, const char **argv, char *const *envp)
 			return (1);
 
 		pid_t pid = fork();
-		printf("process: %d\n", pid);
-
 		if (pid == 0)
 		{
 			close(ports[0]);
@@ -227,7 +233,18 @@ int	main(int argc, const char **argv, char *const *envp)
 		free_arr(params);
 		i++;
 	}
-	printf("%s\n", get_next_line(fd));
+
+	int outfile = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC | O_APPEND);
+
+	char *res;
+	while ((res = get_next_line(fd)))
+	{
+		int len = ft_strlen(res);
+		printf("%s\n", res);
+		write(outfile, res, len);
+		free(res);
+	}
+	close(outfile);
 	close(fd);
 
 	// get_stdin2(&stdin);
@@ -250,6 +267,6 @@ int	main(int argc, const char **argv, char *const *envp)
 	// printf("stdin: '%s'\n", stdin);
 
 	// fd = open("infile", O_RDONLY);
-
+	// system("leaks pipex");
 	return (0);
 }
