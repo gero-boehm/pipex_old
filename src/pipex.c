@@ -6,7 +6,7 @@
 /*   By: gbohm <gbohm@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/12 15:44:18 by gbohm             #+#    #+#             */
-/*   Updated: 2023/02/04 20:39:51 by gbohm            ###   ########.fr       */
+/*   Updated: 2023/02/04 22:08:49 by gbohm            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,17 +185,25 @@ int run_parent(pid_t pid, int *fd, int ports[2])
 	*fd = ports[0];
 }
 
+int	get_write_fd2(const char *fspath, int append, int *fd)
+{
+	int	flags;
+
+	flags = O_WRONLY | O_CREAT | O_APPEND;
+	if (!append)
+		flags |= O_TRUNC;
+	*fd = open(fspath, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	return (*fd == -1);
+}
+
 int output(const char *file, int fd, int is_here_doc)
 {
 	int		outfile;
 	char	*line;
 	size_t	len;
-	int		flags;
 
-	flags = O_WRONLY | O_CREAT | O_APPEND;
-	if (!is_here_doc)
-		flags |= O_TRUNC;
-	outfile = open(file, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	if (get_write_fd2(file, is_here_doc, &outfile))
+		return (1);
 	while (1)
 	{
 		line = get_next_line(fd);
@@ -206,6 +214,7 @@ int output(const char *file, int fd, int is_here_doc)
 		free(line);
 	}
 	close(outfile);
+	return (0);
 }
 
 int	run(int fd, int is_here_doc, const char **argv, char *const *envp)
@@ -241,14 +250,12 @@ int	get_here_doc(char *eof)
 	char	*line;
 	int		fd;
 
-	fd = open("here_doc", O_WRONLY | O_CREAT | O_TRUNC | O_APPEND,
-			S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-	if (fd == -1)
+	if (get_write_fd2("here_doc", 0, &fd))
 		return (1);
 	while (1)
 	{
 		write(1, "heredoc> ", 9);
-		line = get_next_line(0);
+		line = get_next_line(STDIN);
 		if (line == NULL || ft_strncmp(line, eof, ft_strlen(eof)) == 0)
 			break ;
 		write(fd, line, ft_strlen(line));
