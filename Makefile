@@ -2,7 +2,7 @@ CC=cc
 CFLAGS=-I include -I lib/include
 NAME=pipex
 SRC_DIR=src
-SRC=main.c
+SRC=pipex.c
 OBJ=$(addprefix _bin/, $(SRC:.c=.o))
 HEADERS=include/pipex.h
 
@@ -15,7 +15,10 @@ ifdef DEBUG
 endif
 
 all: $(NAME)
-	./$< infile "grep c" outfile
+	rm -f here_doc
+	whoami
+	./$< here_doc eof "grep c" outfile
+	# ./$< infile "grep c" outfile
 	# ./$<
 
 _bin:
