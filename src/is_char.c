@@ -1,31 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex.h                                            :+:      :+:    :+:   */
+/*   is_char.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gbohm <gbohm@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/01/12 15:44:25 by gbohm             #+#    #+#             */
-/*   Updated: 2023/02/07 13:33:02 by gbohm            ###   ########.fr       */
+/*   Created: 2023/02/07 13:30:16 by gbohm             #+#    #+#             */
+/*   Updated: 2023/02/07 13:32:16 by gbohm            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PIPEX_H
-# define PIPEX_H
+int	is_whitespace(char c)
+{
+	return (c == ' ' || c == '\t' || c == '\r'
+		|| c == '\n' || c == '\v' || c == '\f');
+}
 
-# ifndef TWO_COMMANDS_ONLY
-#  define TWO_COMMANDS_ONLY 0
-# endif
-
-# include <stddef.h>
-
-typedef struct s_vector {
-	size_t	size;
-	char	*str;
-}	t_vector;
-
-int	split_params2(const char *cmd, char ***params);
-int	is_whitespace(char c);
-int	is_quote(char c);
-
-#endif
+int	is_quote(char c)
+{
+	return (c == '\'' || c == '"');
+}

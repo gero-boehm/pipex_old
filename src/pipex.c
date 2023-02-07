@@ -6,7 +6,7 @@
 /*   By: gbohm <gbohm@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/12 15:44:18 by gbohm             #+#    #+#             */
-/*   Updated: 2023/02/04 22:08:49 by gbohm            ###   ########.fr       */
+/*   Updated: 2023/02/07 17:03:11 by gbohm            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,27 +64,21 @@ int	starts_with(const char *str, const char *match)
 	return (1);
 }
 
-int	ft_substr2(char const *s, unsigned int start, size_t len, char **sub)
-{
-	*sub = ft_substr(s, start, len);
-	return (*sub == NULL);
-}
+// int	ft_strjoin2(char **dst, const char *src)
+// {
+// 	char	*new;
 
-int	ft_strjoin2(char **dst, const char *src)
-{
-	char	*new;
-
-	if (*dst == NULL)
-	{
-		*dst = src;
-		return (0);
-	}
-	new = ft_strjoin(*dst, src);
-	free(*dst);
-	free(src);
-	*dst = new;
-	return (new == NULL);
-}
+// 	if (*dst == NULL)
+// 	{
+// 		*dst = src;
+// 		return (0);
+// 	}
+// 	new = ft_strjoin(*dst, src);
+// 	free(*dst);
+// 	free(src);
+// 	*dst = new;
+// 	return (new == NULL);
+// }
 
 int	get_paths(char *const *envp, char ***paths)
 {
@@ -92,7 +86,7 @@ int	get_paths(char *const *envp, char ***paths)
 
 	while (*envp)
 	{
-		if(!starts_with(*envp, "PATH="))
+		if (!starts_with(*envp, "PATH="))
 		{
 			envp++;
 			continue ;
@@ -105,16 +99,6 @@ int	get_paths(char *const *envp, char ***paths)
 		break ;
 	}
 	return (0);
-}
-
-void free_arr(void **arr)
-{
-	void	**cursor;
-
-	cursor = arr;
-	while (*cursor != NULL)
-		free(*cursor++);
-	free(arr);
 }
 
 int	join_path2(const char *a, const char *b, const char *c, char **path)
@@ -142,22 +126,64 @@ int	get_command_path(const char *cmd, char *const *envp, char **path)
 	while (*cursor)
 	{
 		if (join_path2(*cursor, "/", cmd, path))
-			return (free_arr((void **) paths), 1);
+			return (ft_arrfree((void **) paths), 1);
 		cursor++;
 		if (access(*path, F_OK))
 		{
 			free(*path);
 			continue ;
 		}
-		free_arr(paths);
+		ft_arrfree((void **) paths);
 		return (0);
 	}
-	free_arr(paths);
+	ft_arrfree((void **) paths);
 	free(*path);
 	return (1);
 }
 
-int	run_child(char *cmd, char *const *envp, int fd, int ports[2])
+
+// int	split_params2(const char *cmd, char ***params)
+// {
+// 	char			*str;
+// 	t_quotes		quotes;
+// 	size_t			len;
+// 	unsigned long	i;
+// 	int				escape;
+
+// 	if (ft_strtrim2(cmd, " \t\r\n\v\f", &str))
+// 		return (1);
+// 	quotes = QUOTES_NONE;
+// 	len = ft_strlen(str);
+// 	i = 0;
+// 	escape = 0;
+// 	while (i < len)
+// 	{
+// 		if (str[i] == '\\')
+// 			escape++;
+// 		else if (escape)
+// 			escape = 0;
+// 		if (quotes == QUOTES_NONE && escape == 0)
+// 		{
+// 			if (str[i] == '\'')
+// 				quotes = QUOTES_SINGLE;
+// 			else if (str[i] == '"')
+// 				quotes = QUOTES_DOUBLE;
+// 		}
+// 		if (quotes != QUOTES_NONE && escape % 2 == 0)
+// 		{
+// 			if (quotes == QUOTES_SINGLE && str[i] == '\'')
+// 				quotes = QUOTES_NONE;
+// 			else if (quotes == QUOTES_DOUBLE && str[i] == '"')
+// 				quotes = QUOTES_NONE;
+// 		}
+// 		if (quotes == QUOTES_NONE && is_whitespace(str[i]))
+// 			str[i] = 0;
+// 	}
+
+
+// }
+
+void	run_child(const char *cmd, char *const *envp, int fd, int ports[2])
 {
 	char	**params;
 	char	*path;
@@ -167,19 +193,21 @@ int	run_child(char *cmd, char *const *envp, int fd, int ports[2])
 	dup2(ports[1], STDOUT);
 	close(fd);
 	close(ports[1]);
-	if (ft_split2(cmd, ' ', &params))
-		return (1);
+	if (split_params2(cmd, &params))
+		exit(1);
 	if (get_command_path(params[0], envp, &path))
-		return (free_arr(params), 2);
+	{
+		ft_arrfree((void **) params);
+		exit(2);
+	}
 	execve(path, params, envp);
 	free(path);
-	free_arr(params);
-	return (3);
+	ft_arrfree((void **) params);
+	exit(3);
 }
 
-int run_parent(pid_t pid, int *fd, int ports[2])
+void run_parent(int *fd, int ports[2])
 {
-	waitpid(pid, NULL, 0);
 	close(ports[1]);
 	close(*fd);
 	*fd = ports[0];
@@ -238,14 +266,16 @@ int	run(int fd, int is_here_doc, const char **argv, char *const *envp)
 		if (pid == 0)
 			run_child(argv[i], envp, fd, ports);
 		else
-			run_parent(pid, &fd, ports);
+			run_parent(&fd, ports);
 		i++;
 	}
 	output(argv[argc - 1], fd, is_here_doc);
 	close(fd);
+	waitpid(0, NULL, 0);
+	return (0);
 }
 
-int	get_here_doc(char *eof)
+int	get_here_doc(const char *eof)
 {
 	char	*line;
 	int		fd;
@@ -295,95 +325,6 @@ int	main(int argc, const char **argv, char *const *envp)
 	if (get_infile2(argv[1], &infile))
 		return (5);
 	run(infile, is_here_doc, argv, envp);
-
-	// fd = open(argv[1], O_RDONLY);
-
-	// char **params;
-	// char *path;
-
-	// int i = 2;
-	// while (i < argc - 1)
-	// {
-	// 	if (ft_split2(argv[i], ' ', &params))
-	// 		return (1);
-	// 	if (get_command_path(params[0], envp, &path))
-	// 		return (free_arr(params), 2);
-
-	// 	int ports[2];
-	// 	if(pipe(ports) == -1)
-	// 		return (1);
-
-	// 	pid_t pid = fork();
-	// 	if (pid == 0)
-	// 	{
-	// 		close(ports[0]);
-	// 		dup2(fd, STDIN);
-	// 		dup2(ports[1], STDOUT);
-	// 		close(fd);
-	// 		close(ports[1]);
-	// 		execve(path, params, envp);
-	// 	}
-	// 	else
-	// 	{
-	// 		waitpid(pid, NULL, 0);
-	// 		close(ports[1]);
-	// 		close(fd);
-	// 		fd = ports[0];
-	// 	}
-	// 	free(path);
-	// 	free_arr(params);
-	// 	i++;
-	// }
-
-	// int outfile = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC | O_APPEND);
-
-	// char *res;
-	// while ((res = get_next_line(fd)))
-	// {
-	// 	int len = ft_strlen(res);
-	// 	write(outfile, res, len);
-	// 	free(res);
-	// }
-	// close(outfile);
-	// close(fd);
-
-	// get_stdin2(&stdin);
-
-	// const char	*limiter = "EOF";
-	// size_t len = ft_strlen(limiter);
-
-	// printf("before\n");
-	// while(1)
-	// {
-	// 	// char buf[21] = {0};
-	// 	write(1, "heredoc> ", 9);
-	// 	char *line = get_next_line(0);
-	// 	(void) line;
-	// 	printf("'%s'\n", line);
-	// 	// printf("read %d bytes: '%s'\n", bytes, buf);
-	// }
-
-	// if (get_here_doc("eof"))
-	// {
-	// 	printf("heredoc failed");
-	// 	return (1);
-	// }
-	// printf("yay\n");
-	// int fd = open("here_doc", O_RDONLY);
-	// char *res;
-	// while ((res = get_next_line(fd)))
-	// {
-	// 	printf("'%s'\n", res);
-	// 	free(res);
-	// }
-	// close(fd);
-	// unlink("here_doc");
-
-
-	// printf("stdin: '%s'\n", stdin);
-
-	// fd = open("infile", O_RDONLY);
 	// system("leaks pipex");
 	return (0);
 }
-
