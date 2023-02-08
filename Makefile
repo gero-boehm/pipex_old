@@ -2,7 +2,7 @@ CC=cc
 CFLAGS=-I include -I lib/include -g
 NAME=pipex
 SRC_DIR=src
-SRC=pipex.c parser.c is_char.c
+SRC=parser.c is_char.c command.c run.c file.c
 OBJ=$(addprefix _bin/, $(SRC:.c=.o))
 HEADERS=include/pipex.h
 
@@ -15,21 +15,21 @@ ifdef DEBUG
 endif
 
 all: $(NAME)
-	# ./$< here_doc eof "grep c" outfile
-	# ./$< infile "grep c" outfile
-	# ./$<
 
 _bin:
 	mkdir $@
 
-_bin/%.o: $(SRC_DIR)/%.c $(HEADERS) | _bin
+_bin/%.o: $(SRC_DIR)/%.c $(HEADERS) Makefile | _bin
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 lib/lib.a:
 	if [! -d "./lib"]; then git clone https://github.com/gero-boehm/lib.git; fi
 	(cd lib && make && make clean)
 
-$(NAME): lib/lib.a $(OBJ)
+$(NAME): lib/lib.a $(OBJ) _bin/pipex.o
+	$(CC) $(CFLAGS) -o $(NAME) $^
+
+bonus: lib/lib.a $(OBJ) _bin/pipex_bonus.o
 	$(CC) $(CFLAGS) -o $(NAME) $^
 
 clean:
