@@ -6,7 +6,7 @@
 /*   By: gbohm <gbohm@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 13:33:08 by gbohm             #+#    #+#             */
-/*   Updated: 2023/02/08 13:41:54 by gbohm            ###   ########.fr       */
+/*   Updated: 2023/02/08 22:48:53 by gbohm            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,13 @@ int	get_command_path2(const char *cmd, char *const *envp, char **path)
 	cursor = paths;
 	while (*cursor)
 	{
-		if (join_path2(*cursor, "/", cmd, path))
+		if (starts_with(cmd, "/") || starts_with(cmd, "./")
+			|| starts_with(cmd, "../"))
+		{
+			if (ft_strdup2(cmd, path))
+				return (2);
+		}
+		else if (join_path2(*cursor, "/", cmd, path))
 			return (ft_arrfree((void **) paths), 1);
 		cursor++;
 		if (access(*path, F_OK))
@@ -82,5 +88,5 @@ int	get_command_path2(const char *cmd, char *const *envp, char **path)
 		return (0);
 	}
 	ft_arrfree((void **) paths);
-	return (1);
+	return (3);
 }

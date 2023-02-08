@@ -6,16 +6,12 @@
 /*   By: gbohm <gbohm@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/12 15:44:25 by gbohm             #+#    #+#             */
-/*   Updated: 2023/02/08 14:17:28 by gbohm            ###   ########.fr       */
+/*   Updated: 2023/02/08 22:00:19 by gbohm            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PIPEX_H
 # define PIPEX_H
-
-# ifndef TWO_COMMANDS_ONLY
-#  define TWO_COMMANDS_ONLY 0
-# endif
 
 # define STDIN 0
 # define STDOUT 1

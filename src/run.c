@@ -6,7 +6,7 @@
 /*   By: gbohm <gbohm@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 14:12:05 by gbohm             #+#    #+#             */
-/*   Updated: 2023/02/08 14:53:14 by gbohm            ###   ########.fr       */
+/*   Updated: 2023/02/08 21:59:21 by gbohm            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,14 @@
 #include "libft.h"
 #include "pipex.h"
 
-void	printparams(char **params)
+static int	get_argc(const char **argv)
 {
-	ft_putendl_fd("===========", 2);
-	while (*params != NULL)
-		ft_putendl_fd(*params++, 2);
+	int	count;
+
+	count = 0;
+	while (argv[count] != NULL)
+		count++;
+	return (count);
 }
 
 static void	run_child(const char *cmd, char *const *envp, int fd, int ports[2])
@@ -36,7 +39,6 @@ static void	run_child(const char *cmd, char *const *envp, int fd, int ports[2])
 	close(ports[1]);
 	if (split_params2(cmd, &params))
 		exit(1);
-	printparams(params);
 	if (get_command_path2(params[0], envp, &path))
 	{
 		ft_putstr_fd("pipex: ", 2);
@@ -46,6 +48,7 @@ static void	run_child(const char *cmd, char *const *envp, int fd, int ports[2])
 		exit(2);
 	}
 	execve(path, params, envp);
+	ft_putendl_fd("pipex: failed to execute command", 2);
 	free(path);
 	ft_arrfree((void **) params);
 	exit(3);
@@ -65,9 +68,7 @@ int	run(int fd, int is_here_doc, const char **argv, char *const *envp)
 	pid_t	pid;
 	int		argc;
 
-	argc = 0;
-	while (argv[argc] != NULL)
-		argc++;
+	argc = get_argc(argv);
 	i = is_here_doc + 2;
 	while (i < argc - 1)
 	{
@@ -82,8 +83,7 @@ int	run(int fd, int is_here_doc, const char **argv, char *const *envp)
 			run_parent(&fd, ports);
 		i++;
 	}
-	i = is_here_doc + 2;
-	while (i++ < argc - 1)
+	while (i-- - is_here_doc - 2)
 		waitpid(0, NULL, 0);
 	output(argv[argc - 1], fd, is_here_doc);
 	close(fd);

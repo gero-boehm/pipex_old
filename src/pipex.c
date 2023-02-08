@@ -6,10 +6,11 @@
 /*   By: gbohm <gbohm@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/12 15:44:18 by gbohm             #+#    #+#             */
-/*   Updated: 2023/02/08 14:35:02 by gbohm            ###   ########.fr       */
+/*   Updated: 2023/02/08 21:34:37 by gbohm            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include "libft.h"
 #include "pipex.h"

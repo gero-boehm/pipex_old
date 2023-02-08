@@ -6,7 +6,7 @@
 /*   By: gbohm <gbohm@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/06 20:27:21 by gbohm             #+#    #+#             */
-/*   Updated: 2023/02/07 13:33:22 by gbohm            ###   ########.fr       */
+/*   Updated: 2023/02/08 20:59:23 by gbohm            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,8 +68,14 @@ static int	remove_quotes2(char **params)
 		len = ft_strlen(*cursor);
 		if (is_quote((*cursor)[len - 1]) && !is_escaped(*cursor, len))
 			(*cursor)[len - 1] = ' ';
-		if (ft_strtrim2(*cursor, " ", &trimmed))
+		if (ft_strrepl2(cursor, "\\\"", "\""))
 			return (1);
+		if (ft_strrepl2(cursor, "\\'", "'"))
+			return (2);
+		if (ft_strrepl2(cursor, "\\\\", "\\"))
+			return (3);
+		if (ft_strtrim2(*cursor, " ", &trimmed))
+			return (4);
 		free(*cursor);
 		*cursor = trimmed;
 		cursor++;

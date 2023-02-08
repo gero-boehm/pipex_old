@@ -6,7 +6,7 @@
 /*   By: gbohm <gbohm@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/12 15:44:18 by gbohm             #+#    #+#             */
-/*   Updated: 2023/02/08 14:43:54 by gbohm            ###   ########.fr       */
+/*   Updated: 2023/02/08 20:52:44 by gbohm            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ int	main(int argc, const char **argv, char *const *envp)
 	if (envp == NULL)
 		return (4);
 	run(infile, is_here_doc, argv, envp);
+	unlink("here_doc");
 	// system("leaks pipex");
 	return (0);
 }
