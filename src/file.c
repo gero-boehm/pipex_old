@@ -6,7 +6,7 @@
 /*   By: gbohm <gbohm@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 14:14:04 by gbohm             #+#    #+#             */
-/*   Updated: 2023/02/08 14:20:35 by gbohm            ###   ########.fr       */
+/*   Updated: 2023/03/14 17:32:53 by gbohm            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,7 @@
 
 int	get_infile2(const char *fspath, int *fd)
 {
-	*fd = open(fspath, O_RDONLY | O_CREAT,
-			S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	*fd = open(fspath, O_RDONLY | O_CREAT, 0644);
 	return (*fd == -1);
 }
 
@@ -30,7 +29,7 @@ int	get_write_fd2(const char *fspath, int append, int *fd)
 	flags = O_WRONLY | O_CREAT | O_APPEND;
 	if (!append)
 		flags |= O_TRUNC;
-	*fd = open(fspath, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	*fd = open(fspath, flags, 0644);
 	return (*fd == -1);
 }
 

@@ -6,13 +6,14 @@
 /*   By: gbohm <gbohm@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 13:33:08 by gbohm             #+#    #+#             */
-/*   Updated: 2023/02/08 22:48:53 by gbohm            ###   ########.fr       */
+/*   Updated: 2023/03/14 17:53:24 by gbohm            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 #include "pipex.h"
 #include "libft.h"
+#include "ft_printf.h"
 
 static int	starts_with(const char *str, const char *match)
 {
@@ -37,25 +38,26 @@ static int	get_paths(char *const *envp, char ***paths)
 		}
 		if (ft_substr2(*envp, 5, ft_strlen(*envp) - 5, &str))
 			return (1);
+		if (*str == 0)
+			return (2);
 		if (ft_split2(str, ':', paths))
-			return (free(str), 2);
+			return (free(str), 3);
 		free(str);
 		break ;
 	}
 	return (*paths == NULL);
 }
 
-static int	join_path2(const char *a, const char *b, const char *c, char **path)
+int	build_path2(char *dir, const char *cmd, char **path)
 {
-	char	*tmp;
-
-	tmp = ft_strjoin(a, b);
-	if (tmp == NULL)
-		return (1);
-	*path = ft_strjoin(tmp, c);
-	if (tmp == NULL)
-		return (free(tmp), 2);
-	free(tmp);
+	if (starts_with(cmd, "/") || starts_with(cmd, "./")
+		|| starts_with(cmd, "../"))
+	{
+		if (ft_strdup2(cmd, path))
+			return (1);
+	}
+	else if (ft_sprintf(path, "%s/%s", dir, cmd) == -1)
+		return (2);
 	return (0);
 }
 
@@ -70,14 +72,8 @@ int	get_command_path2(const char *cmd, char *const *envp, char **path)
 	cursor = paths;
 	while (*cursor)
 	{
-		if (starts_with(cmd, "/") || starts_with(cmd, "./")
-			|| starts_with(cmd, "../"))
-		{
-			if (ft_strdup2(cmd, path))
-				return (2);
-		}
-		else if (join_path2(*cursor, "/", cmd, path))
-			return (ft_arrfree((void **) paths), 1);
+		if (build_path2(*cursor, cmd, path))
+			return (ft_arrfree((void **) paths), 2);
 		cursor++;
 		if (access(*path, F_OK))
 		{

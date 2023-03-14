@@ -6,7 +6,7 @@
 /*   By: gbohm <gbohm@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/12 15:44:18 by gbohm             #+#    #+#             */
-/*   Updated: 2023/02/08 21:34:37 by gbohm            ###   ########.fr       */
+/*   Updated: 2023/03/14 17:27:16 by gbohm            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ int	main(int argc, const char **argv, char *const *envp)
 		return (1);
 	}
 	if (get_infile2(argv[1], &infile))
-		return (2);
+		return (ft_putendl_fd("pipex: error opening infile", 2), 2);
 	if (envp == NULL)
 		return (3);
 	run(infile, 0, argv, envp);
